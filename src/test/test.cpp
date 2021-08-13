@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <iostream>
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -6,6 +8,8 @@
 #include <sys/stat.h>   // stat
 #include <stdbool.h>
 #include <string.h>
+
+//#define DEBUG
 
 #include "../lib/sortlib/sortlib.h"
 #include "../lib/System/System.hpp"
@@ -40,6 +44,7 @@ bool file_exists (char *filename) {
 }
 
 int main(int argc, char *argv[]) {
+    
     int length = atoi(argv[1]);
     char * method = argv[2];
     Events events;
@@ -49,6 +54,10 @@ int main(int argc, char *argv[]) {
     hwinfo = PAPI_get_hardware_info();
 
     string s;
+
+    #ifdef DEBUG
+    printf("Selecting Method\n");
+    #endif
 
     if(strcmp(method, "quicksort") == 0){
         sorthmethod = quicksort;
@@ -65,30 +74,98 @@ int main(int argc, char *argv[]) {
 
     u_int64_t *vector = gen(length);
 
-    events.setNumberOfEvents(3);
+    #ifdef DEBUG
+    printf("Events\n");
+    #endif
+
+    string events_header = "Length,Elapsed Time";
+    int events_number = 0;
+
+    events.setNumberOfEvents(5);
+
+    #ifdef PAPI_L1_TCM
+    events_number += 1;
+    events_header += ",L1 Cache miss";
     events.addEvents(PAPI_L1_TCM);
+    #endif
+
+    #ifdef PAPI_L2_TCM
+    events_number += 1;
+    events_header += ",L2 Cache miss";
     events.addEvents(PAPI_L2_TCM);
+    #endif
+
+    #ifdef PAPI_L3_TCM
+    events_number += 1;
+    events_header += ",L3 Cache miss";
+    events.addEvents(PAPI_L3_TCM);
+    #endif
+    
+    #ifdef PAPI_TOT_INS
+    events_number += 1;
+    events_header += ",Num of instructions";
     events.addEvents(PAPI_TOT_INS);
+    #endif
+
+    #ifdef PAPI_TOT_CYC
+    events_number += 1;
+    events_header += ",Total cycles";
+    events.addEvents(PAPI_TOT_CYC);
+    #endif
+
+    events_header += "\n";
     events.start();
+
+    #ifdef DEBUG
+    cout << "Total: " << events_number << " Event List: " << events_header << endl;
+    #endif
+
+    #ifdef DEBUG
+    printf("Stopwatch\n");
+    #endif
+    
     Stopwatch stopwatch;
     FREQUENCY(stopwatch);
     START_STOPWATCH(stopwatch);
+
+    #ifdef DEBUG
+    printf("Sort\n");
+    #endif
+
 
     sorthmethod(vector, length, sizeof(vector[0]), compare_u_int64_t);
 
     STOP_STOPWATCH(stopwatch);
     events.stop();
-   
+    
+    #ifdef DEBUG
+    printf("File\n");
+    #endif
+
     FILE* file;
     if(file_exists((char *)s.c_str()) == 0 ) {
         file = fopen(s.c_str(), "a");
-        fprintf(file, "Length,Elapsed Time,L1 Cache miss,L2 Cache miss,Num of instructions\n");
+        fprintf(file, events_header.c_str());
     }
     else {
         file = fopen(s.c_str(), "a");
     }
-      
-    fprintf(file, "%d,%.10lf,%lld,%lld,%lld\n", length, stopwatch.mElapsedTime, events.getEventbyIndex(0), events.getEventbyIndex(1), events.getEventbyIndex(2));
+    
+    string values = "";
+
+    values += std::to_string(length) + ",";
+    values += std::to_string(stopwatch.mElapsedTime) + ",";
+
+    for(int i = 0; i < events_number; i++)
+        values += std::to_string(events.getEventbyIndex(i)) + ",";
+    values.erase(values.end() - 1);
+    values += "\n";
+    
+    #ifdef DEBUG
+        cout << "Values: " << values << endl;
+    #endif
+
+    fprintf(file, values.c_str());
 
 
     free(vector);
