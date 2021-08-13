@@ -14,7 +14,7 @@ OBJ=$(C_SOURCE:.c=.o)
 CC=g++
 
 # Flags
-CC_FLAGS= -O3 -c
+CC_FLAGS= -O0 -c
 
 ################################
 # Compilation
