@@ -9,6 +9,9 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <papi.h>
+
+
 //#define DEBUG
 
 #include "../lib/sortlib/sortlib.h"
@@ -43,8 +46,22 @@ bool file_exists (char *filename) {
   return (stat (filename, &buffer) == 0);
 }
 
+
+int is_avail(int EventCode) {
+    return PAPI_query_event(EventCode) == PAPI_OK;
+}
+
 int main(int argc, char *argv[]) {
     
+    #ifdef DEBUG
+    
+    cout << "PAPI_FP_OPS: " << (PAPI_query_event(PAPI_FP_OPS) != PAPI_OK) << endl;
+    cout << "PAPI_L1_TCM: " << (PAPI_query_event(PAPI_L1_TCM) != PAPI_OK) << endl;
+
+
+
+    #endif
+
     int length = atoi(argv[1]);
     char * method = argv[2];
     Events events;
@@ -83,34 +100,60 @@ int main(int argc, char *argv[]) {
 
     events.setNumberOfEvents(5);
 
-    #ifdef PAPI_L1_TCM
-    events_number += 1;
-    events_header += ",L1 Cache miss";
-    events.addEvents(PAPI_L1_TCM);
+    int status;    
+
+    if(status = is_avail(PAPI_L1_TCM)) {
+        events_number += 1;
+        events_header += ",L1 Cache miss";
+        events.addEvents(PAPI_L1_TCM);
+    }
+
+    #ifdef DEBUG
+    cout << "PAPI_L1_TCM: " << status << endl;
     #endif
 
-    #ifdef PAPI_L2_TCM
-    events_number += 1;
-    events_header += ",L2 Cache miss";
-    events.addEvents(PAPI_L2_TCM);
+    if(status = is_avail(PAPI_L2_TCM)) {
+        events_number += 1;
+        events_header += ",L2 Cache miss";
+        events.addEvents(PAPI_L2_TCM);
+    }
+
+    #ifdef DEBUG
+    cout << "PAPI_L2_TCM: " << status << endl;
     #endif
 
-    #ifdef PAPI_L3_TCM
-    events_number += 1;
-    events_header += ",L3 Cache miss";
-    events.addEvents(PAPI_L3_TCM);
+    if(is_avail(PAPI_L3_TCM)) {
+        events_number += 1;
+        events_header += ",L3 Cache miss";
+        events.addEvents(PAPI_L3_TCM);
+    }
+    
+    #ifdef DEBUG
+    cout << "PAPI_L3_TCM: " << status << endl;
+    #endif
+
+    if(is_avail(PAPI_TOT_INS)) {
+        events_number += 1;
+        events_header += ",Num of instructions";
+        events.addEvents(PAPI_TOT_INS);
+    }
+
+    #ifdef DEBUG
+    cout << "PAPI_TOT_INS: " << status << endl;
     #endif
     
-    #ifdef PAPI_TOT_INS
-    events_number += 1;
-    events_header += ",Num of instructions";
-    events.addEvents(PAPI_TOT_INS);
+    if(is_avail(PAPI_TOT_CYC)) {
+        events_number += 1;
+        events_header += ",Total cycles";
+        events.addEvents(PAPI_TOT_CYC);
+    }
+    
+    #ifdef DEBUG
+    cout << "PAPI_TOT_CYC: " << status << endl;
     #endif
 
-    #ifdef PAPI_TOT_CYC
-    events_number += 1;
-    events_header += ",Total cycles";
-    events.addEvents(PAPI_TOT_CYC);
+    #ifdef DEBUG
+    cout << "PAPI_FNV_INS: " << is_avail(PAPI_FNV_INS) << endl;
     #endif
 
     events_header += "\n";
