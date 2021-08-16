@@ -8,6 +8,7 @@
 #include <sys/stat.h>   // stat
 #include <stdbool.h>
 #include <string.h>
+#include <array>
 
 #include <papi.h>
 
@@ -52,16 +53,6 @@ int is_avail(int EventCode) {
 }
 
 int main(int argc, char *argv[]) {
-    
-    #ifdef DEBUG
-    
-    cout << "PAPI_FP_OPS: " << (PAPI_query_event(PAPI_FP_OPS) != PAPI_OK) << endl;
-    cout << "PAPI_L1_TCM: " << (PAPI_query_event(PAPI_L1_TCM) != PAPI_OK) << endl;
-
-
-
-    #endif
-
     int length = atoi(argv[1]);
     char * method = argv[2];
     Events events;
@@ -96,71 +87,37 @@ int main(int argc, char *argv[]) {
     #endif
 
     string events_header = "Length,Elapsed Time";
-    int events_number = 0;
+  
+    int numberOfEvents = 0;
+    std::array<int, 5> intEvents = {PAPI_L1_TCM, PAPI_L2_TCM, PAPI_L3_TCM, PAPI_TOT_INS, PAPI_TOT_CYC};
+    string stringEvents[5] = {"L1 Cache miss", "L2 Cache miss", "L3 Cache miss", "Num of instructions", "Total cycles"};
 
-    events.setNumberOfEvents(5);
+    for (int i = 0; i < intEvents.size(); i++)
+    {
+        if(is_avail(intEvents[i]))
+            numberOfEvents += 1;
+    }
+    
+    events.setNumberOfEvents(numberOfEvents);
 
     int status;    
 
-    if(status = is_avail(PAPI_L1_TCM)) {
-        events_number += 1;
-        events_header += ",L1 Cache miss";
-        events.addEvents(PAPI_L1_TCM);
-    }
-
-    #ifdef DEBUG
-    cout << "PAPI_L1_TCM: " << status << endl;
-    #endif
-
-    if(status = is_avail(PAPI_L2_TCM)) {
-        events_number += 1;
-        events_header += ",L2 Cache miss";
-        events.addEvents(PAPI_L2_TCM);
-    }
-
-    #ifdef DEBUG
-    cout << "PAPI_L2_TCM: " << status << endl;
-    #endif
-
-    if(is_avail(PAPI_L3_TCM)) {
-        events_number += 1;
-        events_header += ",L3 Cache miss";
-        events.addEvents(PAPI_L3_TCM);
+    for (int i = 0; i < intEvents.size(); i++)
+    {
+        if(status = is_avail(intEvents[i])){
+            events_header += "," + stringEvents[i];
+            events.addEvents(intEvents[i]);
+        }
+        #ifdef DEBUG
+            cout << stringEvents[i] + ": " << status << endl;
+        #endif
     }
     
-    #ifdef DEBUG
-    cout << "PAPI_L3_TCM: " << status << endl;
-    #endif
-
-    if(is_avail(PAPI_TOT_INS)) {
-        events_number += 1;
-        events_header += ",Num of instructions";
-        events.addEvents(PAPI_TOT_INS);
-    }
-
-    #ifdef DEBUG
-    cout << "PAPI_TOT_INS: " << status << endl;
-    #endif
-    
-    if(is_avail(PAPI_TOT_CYC)) {
-        events_number += 1;
-        events_header += ",Total cycles";
-        events.addEvents(PAPI_TOT_CYC);
-    }
-    
-    #ifdef DEBUG
-    cout << "PAPI_TOT_CYC: " << status << endl;
-    #endif
-
-    #ifdef DEBUG
-    cout << "PAPI_FNV_INS: " << is_avail(PAPI_FNV_INS) << endl;
-    #endif
-
     events_header += "\n";
     events.start();
 
     #ifdef DEBUG
-    cout << "Total: " << events_number << " Event List: " << events_header << endl;
+    cout << "Total: " << numberOfEvents << " Event List: " << events_header << endl;
     #endif
 
     #ifdef DEBUG
@@ -199,7 +156,7 @@ int main(int argc, char *argv[]) {
     values += std::to_string(length) + ",";
     values += std::to_string(stopwatch.mElapsedTime) + ",";
 
-    for(int i = 0; i < events_number; i++)
+    for(int i = 0; i < numberOfEvents; i++)
         values += std::to_string(events.getEventbyIndex(i)) + ",";
     values.erase(values.end() - 1);
     values += "\n";
