@@ -1,0 +1,92 @@
+Memory Cache and TLB Hierarchy Information.
+------------------------------------------------------------------------
+TLB Information.
+  There may be multiple descriptors for each level of TLB
+  if multiple page sizes are supported.
+
+L1 Instruction TLB:
+  Page Size:           4096 KB
+  Number of Entries:     12
+  Associativity:       Full
+
+L1 Data TLB:
+  Page Size:           4096 KB
+  Number of Entries:     32
+  Associativity:       Full
+
+L1 Instruction TLB:
+  Page Size:           2048 KB
+  Number of Entries:     24
+  Associativity:       Full
+
+L1 Data TLB:
+  Page Size:           2048 KB
+  Number of Entries:     64
+  Associativity:       Full
+
+L1 Instruction TLB:
+  Page Size:              4 KB
+  Number of Entries:     48
+  Associativity:       Full
+
+L1 Data TLB:
+  Page Size:              4 KB
+  Number of Entries:     64
+  Associativity:       Full
+
+L2 Instruction TLB:
+  Page Size:           4096 KB
+  Number of Entries:    512
+  Associativity:          8
+
+L2 Data TLB:
+  Page Size:           4096 KB
+  Number of Entries:    512
+  Associativity:          8
+
+L2 Instruction TLB:
+  Page Size:           2048 KB
+  Number of Entries:   1024
+  Associativity:          8
+
+L2 Data TLB:
+  Page Size:           2048 KB
+  Number of Entries:   1024
+  Associativity:          8
+
+L2 Instruction TLB:
+  Page Size:              4 KB
+  Number of Entries:    512
+  Associativity:          4
+
+L2 Data TLB:
+  Page Size:              4 KB
+  Number of Entries:   1024
+  Associativity:          8
+
+
+Cache Information.
+
+L1 Data Cache:
+  Total size:            16 KB
+  Line size:             64 B
+  Number of Lines:      256
+  Associativity:          4
+
+L1 Instruction Cache:
+  Total size:            64 KB
+  Line size:             64 B
+  Number of Lines:     1024
+  Associativity:          2
+
+L2 Unified Cache:
+  Total size:          2048 KB
+  Line size:             64 B
+  Number of Lines:    32768
+  Associativity:         16
+
+L3 Unified Cache:
+  Total size:          8192 KB
+  Line size:             64 B
+  Number of Lines:   131072
+  Associativity:         64
