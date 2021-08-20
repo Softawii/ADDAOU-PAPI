@@ -1,2 +1,2 @@
-# architecture-2
-Architecture 2 - The Enemy is Now Another
+# Análise do desempenho de algorítmos de ordenação utilizando PAPI
+TODO
