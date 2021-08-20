@@ -1,2 +1,2 @@
-# Análise do desempenho de algorítmos de ordenação utilizando PAPI
+# Análise do Desempenho de Algorítmos de Ordenação Utilizando PAPI
 TODO
