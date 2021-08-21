@@ -1,2 +1,3 @@
 *.ipynb linguist-documentation
+src/lib/sortlib/* linguist-vendored
 src/lib/* linguist-vendored
